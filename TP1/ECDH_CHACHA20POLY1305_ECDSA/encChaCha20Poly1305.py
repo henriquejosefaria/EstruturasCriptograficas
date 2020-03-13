@@ -67,7 +67,6 @@ class encChaCha20Poly1305():
         nonce = os.urandom(12)
 
     	#cypher generation 
-        #key = os.urandom(32)
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
     	#encryption ChaCha20Poly1305
@@ -80,7 +79,6 @@ class encChaCha20Poly1305():
     	#nonce and key retrieval
         ct = pickle.loads(ct)
         nonce = ct["nonce"]
-        #key = ct["key"]
  		#cip recreation
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
