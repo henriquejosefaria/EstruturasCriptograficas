@@ -9,13 +9,11 @@ from cryptography.hazmat.primitives.serialization import Encoding,ParameterForma
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.serialization import load_pem_private_key,load_pem_parameters,load_pem_public_key,PublicFormat,ParameterFormat
-from cryptography.hazmat.primitives.asymmetric import dsa
 from chacha20poly1305 import ChaCha20Poly1305
 from cryptography.hazmat.primitives.asymmetric import ec
 
-
 class encChaCha20Poly1305():
-	
+
     RCV_BYTES = 1024
     HMAC_KEY_SIZE = 32
     ENCRYPTION_KEY_SIZE = 32
@@ -62,28 +60,43 @@ class encChaCha20Poly1305():
         sSharedSecret = None
         eSharedSecret = None
 
-
     def encrypt(self,msg):
         nonce = os.urandom(12)
 
-    	#cypher generation 
+        #cypher generation 
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
-    	#encryption ChaCha20Poly1305
+        #encryption ChaCha20Poly1305
         ct = cip.encrypt(nonce, msg)
 
         ret = {"ct": ct, "nonce": nonce}
         return  pickle.dumps(ret)
-
+        '''
+        nonce = os.urandom(16)
+        # encryption
+        cipher = Cipher(algorithms.AES(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE]),modes.CTR(nonce),backend=self.backend)
+        enc = cipher.encryptor()
+        ct = enc.update(msg) + enc.finalize()
+        ret = {"ct": ct,"nonce": nonce}
+        return  pickle.dumps(ret)
+        '''
     def decrypt(self,ct):
-    	#nonce and key retrieval
+        #nonce and key retrieval
         ct = pickle.loads(ct)
         nonce = ct["nonce"]
- 		#cip recreation
+        #cip recreation
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
         msg = cip.decrypt(nonce, ct["ct"])
         return msg
+        '''
+        ct = pickle.loads(ct)
+        nonce = ct["nonce"]
+        cipher = Cipher(algorithms.AES(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE]),modes.CTR(nonce),backend=self.backend)
+        dec = cipher.encryptor()
+        msg = dec.update(ct["ct"]) + dec.finalize()
+        return msg
+        '''
     
     def mac(self,msg):
         macer = hmac.HMAC(self.shared_key[encChaCha20Poly1305.ENCRYPTION_KEY_SIZE:encChaCha20Poly1305.HMAC_KEY_SIZE],hashes.SHA256(),backend=self.backend)
@@ -110,7 +123,7 @@ class encChaCha20Poly1305():
             return None
 
     def sign(self,msg):
-        return self.dsa_private_key.sign(msg, ec.ECDSA(hashes.SHA256()))
+        return self.dsa_private_key.sign(msg,ec.ECDSA(hashes.SHA256()))
 
     def verifySign(self,msg,signature):
         self.dsa_public_key.verify(signature,msg,ec.ECDSA(hashes.SHA256()))
@@ -246,4 +259,3 @@ def decodePublicKey(key,backend):
 
 def decodePrivateKey(key,backend):
     return load_pem_private_key(key,None,backend=backend)
-

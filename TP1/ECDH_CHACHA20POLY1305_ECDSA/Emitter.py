@@ -21,7 +21,7 @@ class Emitter():
     def run(self):
         self.crypto.setParameters(b'-----BEGIN DH PARAMETERS-----\nMEYCQQC+ncO/Ujb2mfSmTKNAjEDjAnS42amR2TWreIkMUbQ2QJQqp9ZxH9OS/6ET\nGBfmuEcyew5q4LJgy2D2O7VS4UlzAgEC\n-----END DH PARAMETERS-----\n')
         # voltar a conetar?
-        self.connect("localhost",8001)
+        self.connect("localhost",8002)
 
 emitter_private = b'-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgn7V5eN4xEdOQIeoN\nS1L+ktkKXqYamjPeGluQWiunR+ChRANCAARbwEwyxnt6sejaSssI7CzlyqRzpGdn\n31eDm96q+isoHDqtfpdNiYtBws4EY6rk2eDcpibTwozq1rQHuQe0HnC/\n-----END PRIVATE KEY-----\n'
 receiver_public = b'-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuuJ437PQOj5MsLRJxUZi43TMeCju\n9r8V7TEc6u3rAw+/mg1Rf4R1S6JHMxJ+/0WpKuZfeTlCVoSwfhgjRnDeTA==\n-----END PUBLIC KEY-----\n'
