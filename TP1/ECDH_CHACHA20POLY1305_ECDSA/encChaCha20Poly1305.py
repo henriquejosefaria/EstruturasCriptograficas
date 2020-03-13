@@ -9,7 +9,7 @@ from cryptography.hazmat.primitives.serialization import Encoding,ParameterForma
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat.primitives.serialization import load_pem_private_key,load_pem_parameters,load_pem_public_key,PublicFormat,ParameterFormat
-from chacha20poly1305 import ChaCha20Poly1305
+from cryptography.hazmat.primitives.ciphers.aead import ChaCha20Poly1305
 from cryptography.hazmat.primitives.asymmetric import ec
 
 class encChaCha20Poly1305():
@@ -59,44 +59,41 @@ class encChaCha20Poly1305():
         self.shared_key = kdf.derive(sSharedSecret + eSharedSecret)
         sSharedSecret = None
         eSharedSecret = None
-
+    '''
+        data = b"a secret message"
+         aad = b"authenticated but unencrypted data"
+         #key = ChaCha20Poly1305.generate_key()
+         #chacha = ChaCha20Poly1305(key)
+         #nonce = os.urandom(12)
+         ct = chacha.encrypt(nonce, data, aad)
+         chacha.decrypt(nonce, ct, aad)
+    '''
     def encrypt(self,msg):
         nonce = os.urandom(12)
+        #frase extra para complicar
+        aad = b"frase estranha para complicar a cifragem"
 
         #cypher generation 
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
         #encryption ChaCha20Poly1305
-        ct = cip.encrypt(nonce, msg)
+        ct = cip.encrypt(nonce, msg, aad)
 
         ret = {"ct": ct, "nonce": nonce}
         return  pickle.dumps(ret)
-        '''
-        nonce = os.urandom(16)
-        # encryption
-        cipher = Cipher(algorithms.AES(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE]),modes.CTR(nonce),backend=self.backend)
-        enc = cipher.encryptor()
-        ct = enc.update(msg) + enc.finalize()
-        ret = {"ct": ct,"nonce": nonce}
-        return  pickle.dumps(ret)
-        '''
+
     def decrypt(self,ct):
         #nonce and key retrieval
         ct = pickle.loads(ct)
         nonce = ct["nonce"]
+        aad = b"frase estranha para complicar a cifragem"
+
         #cip recreation
         cip = ChaCha20Poly1305(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE])
 
-        msg = cip.decrypt(nonce, ct["ct"])
+        msg = cip.decrypt(nonce, ct["ct"], aad)
         return msg
-        '''
-        ct = pickle.loads(ct)
-        nonce = ct["nonce"]
-        cipher = Cipher(algorithms.AES(self.shared_key[:encChaCha20Poly1305.ENCRYPTION_KEY_SIZE]),modes.CTR(nonce),backend=self.backend)
-        dec = cipher.encryptor()
-        msg = dec.update(ct["ct"]) + dec.finalize()
-        return msg
-        '''
+
     
     def mac(self,msg):
         macer = hmac.HMAC(self.shared_key[encChaCha20Poly1305.ENCRYPTION_KEY_SIZE:encChaCha20Poly1305.HMAC_KEY_SIZE],hashes.SHA256(),backend=self.backend)
