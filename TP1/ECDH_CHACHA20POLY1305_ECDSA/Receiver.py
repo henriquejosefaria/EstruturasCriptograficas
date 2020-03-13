@@ -29,9 +29,9 @@ class Receiver():
         # voltar a conetar?
         self.connect()
 receiver_private =b'-----BEGIN PRIVATE KEY-----\nMIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg8qxS9j0ugWkD63+5\nhjA5y0iPJjMGSzrbswHwNEEqxfShRANCAAS64njfs9A6PkywtEnFRmLjdMx4KO72\nvxXtMRzq7esDD7+aDVF/hHVLokczEn7/Rakq5l95OUJWhLB+GCNGcN5M\n-----END PRIVATE KEY-----\n'
-receiver_public = b'-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEuuJ437PQOj5MsLRJxUZi43TMeCju\n9r8V7TEc6u3rAw+/mg1Rf4R1S6JHMxJ+/0WpKuZfeTlCVoSwfhgjRnDeTA==\n-----END PUBLIC KEY-----\n'
+emitter_public = b'-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEW8BMMsZ7erHo2krLCOws5cqkc6Rn\nZ99Xg5veqvorKBw6rX6XTYmLQcLOBGOq5Nng3KYm08KM6ta0B7kHtB5wvw==\n-----END PUBLIC KEY-----\n'
 
 
-enc = encChaCha20Poly1305.encChaCha20Poly1305(encChaCha20Poly1305.decodePublicKey(receiver_public,default_backend()),encChaCha20Poly1305.decodePrivateKey(receiver_private,default_backend()))
+enc = encChaCha20Poly1305.encChaCha20Poly1305(encChaCha20Poly1305.decodePublicKey(emitter_public,default_backend()),encChaCha20Poly1305.decodePrivateKey(receiver_private,default_backend()))
 rec = Receiver(8001,"localhost",enc)
 rec.run()
