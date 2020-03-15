@@ -56,15 +56,7 @@ class encChaCha20Poly1305():
         self.shared_key = kdf.derive(sSharedSecret + eSharedSecret)
         sSharedSecret = None
         eSharedSecret = None
-    '''
-        data = b"a secret message"
-         aad = b"authenticated but unencrypted data"
-         #key = ChaCha20Poly1305.generate_key()
-         #chacha = ChaCha20Poly1305(key)
-         #nonce = os.urandom(12)
-         ct = chacha.encrypt(nonce, data, aad)
-         chacha.decrypt(nonce, ct, aad)
-    '''
+
     def encrypt(self,msg):
         nonce = os.urandom(12)
         #frase extra para complicar
