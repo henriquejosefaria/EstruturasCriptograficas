@@ -1,6 +1,5 @@
-from cryptography.hazmat.primitives.asymmetric import dsa
 from cryptography.hazmat.backends import default_backend
-from cryptography.hazmat.primitives import serialization,hashes
+from cryptography.hazmat.primitives import serialization
 from cryptography.hazmat.primitives.asymmetric import ec
 
 priv_key_ECDSA = ec.generate_private_key(ec.SECP256R1(), default_backend())
