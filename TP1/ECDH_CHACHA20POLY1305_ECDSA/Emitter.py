@@ -1,4 +1,5 @@
 import socket
+from cryptography.hazmat.primitives.asymmetric import ec
 import encChaCha20Poly1305
 from cryptography.hazmat.backends import default_backend
 
@@ -19,7 +20,7 @@ class Emitter():
                     self.crypto.messaging(so)
     
     def run(self):
-        self.crypto.setParameters(b'-----BEGIN DH PARAMETERS-----\nMEYCQQC+ncO/Ujb2mfSmTKNAjEDjAnS42amR2TWreIkMUbQ2QJQqp9ZxH9OS/6ET\nGBfmuEcyew5q4LJgy2D2O7VS4UlzAgEC\n-----END DH PARAMETERS-----\n')
+        self.crypto.setParameters(ec.SECP384R1())
         # voltar a conetar?
         self.connect("localhost",8002)
 

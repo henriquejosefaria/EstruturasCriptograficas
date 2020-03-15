@@ -18,40 +18,37 @@ class encChaCha20Poly1305():
     HMAC_KEY_SIZE = 32
     ENCRYPTION_KEY_SIZE = 32
     
-    def __init__(self,dsa_public_key,dsa_private_key):
+    def __init__(self,ecdsa_public_key,ecdsa_private_key):
         self.parameters = None # Parametros para o AES
         self.private_key = None # static chave privada
         self.public_key = None # static chave publica
         self.e_private_key = None # ephemeral chave privada
         self.e_public_key = None # ephemeral chave publica
         self.shared_key = None # chave derivada a partir do segredo partilhado
-        self.dsa_private_key = dsa_private_key # Chave privada DSA
-        self.dsa_public_key = dsa_public_key # Chave pública DSA do outro
+        self.ecdsa_private_key = ecdsa_private_key # Chave privada DSA
+        self.ecdsa_public_key = ecdsa_public_key # Chave pública DSA do outro
         self.backend = default_backend()
 
 
     def gen_key_params(self):
-        self.parameters = dh.generate_parameters(generator=2, key_size=512, backend = default_backend())
-        self.private_key =  self.parameters.generate_private_key()
+        self.parameters = ec.SECP384R1()
+        self.private_key =  ec.generate_private_key(self.parameters,backend=self.backend)
         self.public_key = self.private_key.public_key()
     
     def gen_ephemeral_key(self):
-        self.e_private_key = self.parameters.generate_private_key()
+        self.e_private_key = ec.generate_private_key(self.parameters,backend=self.backend)
         self.e_public_key = self.e_private_key.public_key()
 
-    def setParameters(self, parameters):
-        parametersD = decodeParameters(parameters,self.backend)
-        if isinstance(parametersD,dh.DHParameters):
-            self.parameters = parametersD
-            self.private_key = self.parameters.generate_private_key()
-            self.public_key = self.private_key.public_key()
-            return True
-        return False
+    def setParameters(self, curve):
+        self.parameters = curve
+        self.private_key = ec.generate_private_key(self.parameters,backend=self.backend)
+        self.public_key = self.private_key.public_key()
+        return True
     
     def generateSharedSecret(self,publicKey,privateKey):
         publicKeyD = decodePublicKey(publicKey,self.backend)
-        if isinstance(publicKeyD,dh.DHPublicKey):
-            return privateKey.exchange(publicKeyD)
+        if isinstance(publicKeyD,ec.EllipticCurvePublicKey):
+            return privateKey.exchange(ec.ECDH(),publicKeyD)
         return None
     
     def generateSharedKey(self,sSharedSecret,eSharedSecret,salt=b"0"):
@@ -59,15 +56,7 @@ class encChaCha20Poly1305():
         self.shared_key = kdf.derive(sSharedSecret + eSharedSecret)
         sSharedSecret = None
         eSharedSecret = None
-    '''
-        data = b"a secret message"
-         aad = b"authenticated but unencrypted data"
-         #key = ChaCha20Poly1305.generate_key()
-         #chacha = ChaCha20Poly1305(key)
-         #nonce = os.urandom(12)
-         ct = chacha.encrypt(nonce, data, aad)
-         chacha.decrypt(nonce, ct, aad)
-    '''
+
     def encrypt(self,msg):
         nonce = os.urandom(12)
         #frase extra para complicar
@@ -120,10 +109,10 @@ class encChaCha20Poly1305():
             return None
 
     def sign(self,msg):
-        return self.dsa_private_key.sign(msg,ec.ECDSA(hashes.SHA256()))
+        return self.ecdsa_private_key.sign(msg,ec.ECDSA(hashes.SHA256()))
 
     def verifySign(self,msg,signature):
-        self.dsa_public_key.verify(signature,msg,ec.ECDSA(hashes.SHA256()))
+        self.ecdsa_public_key.verify(signature,msg,ec.ECDSA(hashes.SHA256()))
 
     def keyAgreementE(self,connection):
         
@@ -225,7 +214,12 @@ class encChaCha20Poly1305():
         while True:
             data = input("---> ")    
             encData = self.encryptThenMac(data)
-            connection.send(encData)
+            try:
+                connection.send(encData)    
+            except BrokenPipeError as Br:
+                print("The Receiver has Shutdown for some reason")
+                break
+    
             if "Exit" == data:
                 break
             
