@@ -1,1 +1,1 @@
-# EstruturasCriptogr-ficas
+# EstruturasCriptográficas
