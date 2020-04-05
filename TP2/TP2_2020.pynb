@@ -1,0 +1,125 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import hashlib\n",
+    "\n",
+    "#gerador de números primos\n",
+    "def genPrime(param):\n",
+    "    return random_prime(2**param-1,True,2**(param-1))\n",
+    "\n",
+    "\n",
+    "class RSA:\n",
+    "\n",
+    "    def __init__(self,secure_param):\n",
+    "        self.secure_param = int(secure_param)\n",
+    "\n",
+    "    def keygen(self):\n",
+    "        # geração de números aletórios p e q\n",
+    "        p = genPrime(int(self.secure_param/2) +1)\n",
+    "        q = genPrime(int(self.secure_param/2))\n",
+    "        while p <= 2*q:\n",
+    "            p = genPrime(int(self.secure_param/2) +1)\n",
+    "            q = genPrime(int(self.secure_param/2))\n",
+    "        #cálculo do parâmetro n\n",
+    "        n = p*q\n",
+    "        #Cálculo de phi de n para primos\n",
+    "        phin = (p-1)*(q-1)\n",
+    "        #geração de número com inversa multiplicativamodulo phi de n\n",
+    "        #e tem de satisfazer a igualdade  1 < e < phi(N)\n",
+    "        e = randint(2,phin)\n",
+    "        #este ciclo assegura que depois de gerado E,\n",
+    "        #o mdc entre E e phi(N) tem que ser igual a 1\n",
+    "        while gcd(phin,e) != 1:\n",
+    "            e = randint(2,phin)\n",
+    "        #cálculo da inversa de e\n",
+    "        d = power_mod(e,-1,phin)\n",
+    "        #Cálculo das chaves pública e privada\n",
+    "        PubKey = (n,e)\n",
+    "        PrivKey = d\n",
+    "        return PubKey,PrivKey\n",
+    "\n",
+    "    #Encryption\n",
+    "    def encryption(self,plainText,PubKey):\n",
+    "        n,e = PubKey\n",
+    "        cipherText = power_mod(plainText,e,n)\n",
+    "        return cipherText\n",
+    "\n",
+    "\n",
+    "    #Decryption\n",
+    "    def decryption(self,cipherText,PrivKey,PubKey):\n",
+    "        d = PrivKey\n",
+    "        n, _ = PubKey\n",
+    "        plainText=power_mod(cipherText,d,n)\n",
+    "        return plainText\n",
+    "\n",
+    "    def sign(self,message,PrivKey,PubKey):\n",
+    "        n,_ = PubKey\n",
+    "        cipher = PKCS1_OAEP.new(key)\n",
+    "        d = PrivKey\n",
+    "        message_hash = int(hashlib.sha256(str(message)).hexdigest(),16)\n",
+    "        assinatura = power_mod(message_hash,d,n)\n",
+    "        return assinatura, message\n",
+    "\n",
+    "    def verify(self,assinatura,message,PubKey):\n",
+    "        n,e = PubKey\n",
+    "        teste_sign = power_mod(assinatura,e,n)\n",
+    "        message_hash = int(hashlib.sha256(str(message)).hexdigest(),16)\n",
+    "        if message_hash != teste_sign:\n",
+    "            print('assinatura inválida!!')\n",
+    "        else:\n",
+    "            print('assinatura válida')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "X = RSA(512)\n",
+    "PubKey,PrivKey = X.keygen()\n",
+    "print(PubKey)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "SageMath 9.0",
+   "language": "sage",
+   "name": "sagemath"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.7.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
